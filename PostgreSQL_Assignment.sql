@@ -156,7 +156,37 @@ WHERE
     ) < 1800;
 
 -- Problem 8
-SELECT sighting_id, sighting_time FROM sightings;
+SELECT sighting_id, COALESCE(morning, afternoon, evening) AS time_of_day
+FROM (
+        SELECT
+            sighting_id, (
+                SELECT 'Morning'
+                WHERE
+                    EXTRACT(
+                        HOUR
+                        FROM sighting_time
+                    ) < 12
+            ) AS morning, (
+                SELECT 'Afternoon'
+                WHERE
+                    EXTRACT(
+                        HOUR
+                        FROM sighting_time
+                    ) >= 12
+                    AND EXTRACT(
+                        HOUR
+                        FROM sighting_time
+                    ) < 17
+            ) AS afternoon, (
+                SELECT 'Evening'
+                WHERE
+                    EXTRACT(
+                        HOUR
+                        FROM sighting_time
+                    ) >= 17
+            ) AS evening
+        FROM sightings
+    );
 
 -- Problem 9
 DELETE FROM rangers
